@@ -17,7 +17,7 @@ import SwiftLocation
 import LTMorphingLabel
 import CoreLocation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     var indicatorView: NVActivityIndicatorView!
     var menuButton, searchButton, navigateButton, moreDetailsButton: UIButton!
@@ -25,7 +25,8 @@ class ViewController: UIViewController {
 
     var width: CGFloat = 0.0
     var height: CGFloat = 0.0
-    
+    var mainTableVIew:UITableView!
+    var allStationData: NSMutableArray = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -86,9 +87,21 @@ class ViewController: UIViewController {
                                 distance = location.distanceFromLocation(stationCoordinate)
                                 nearIndex = index
                             }
+                            
+                            print(retVal!![nearIndex]!!["sna"])
+                            print(location.distanceFromLocation(stationCoordinate))
+                            
+                            let stationDictionary = NSMutableDictionary(dictionary: retVal!![index]!! as! [NSObject : AnyObject])
+                            stationDictionary["distance"] = distance
+                            
+                            self.allStationData.addObject(stationDictionary)
                         }
+                        let descriptor: NSSortDescriptor = NSSortDescriptor(key: "distance", ascending: true)
+                        let sortedResults: NSArray = self.allStationData.sortedArrayUsingDescriptors([descriptor])
+                        self.allStationData = NSMutableArray(array: sortedResults)
+                        
                         self.initUserInterface(retVal!![nearIndex]!!["sna"] as! String
-                            , nearDistance: String(distance), rentCount: retVal!![nearIndex]!!["tot"] as! String, returnCount: retVal!![nearIndex]!!["sbi"] as! String)
+                            , nearDistance: String(format: "%.2f KM",distance/1000), rentCount: retVal!![nearIndex]!!["tot"] as! String, returnCount: retVal!![nearIndex]!!["sbi"] as! String)
                         self.showResultAnimation()
                         
                     }) { error in
@@ -135,6 +148,9 @@ class ViewController: UIViewController {
                                                     self.searchButton.frame = CGRectMake( self.width - 54, 30, 44, 44)
                                                     self.searchButton.alpha = 1
                                                     self.moreDetailsButton.frame = CGRectMake(0, self.height - 64, self.width, 64);
+                                                    }, completion: {
+                                                        finished in
+                                                        self.mainTableVIew.scrollEnabled = true
                                                 })
                                         })
                                 })
@@ -144,6 +160,17 @@ class ViewController: UIViewController {
     }
     
     func initUserInterface(nearName: String, nearDistance: String, rentCount: String, returnCount: String) {
+        // Main table
+        mainTableVIew = UITableView()
+        mainTableVIew.frame = self.view.frame
+        mainTableVIew.backgroundColor = UIColor.clearColor()
+        mainTableVIew.delegate = self
+        mainTableVIew.dataSource = self
+        mainTableVIew.separatorStyle = .None
+        mainTableVIew.scrollEnabled = false
+        mainTableVIew.allowsSelection = false
+        self.view.addSubview(mainTableVIew)
+        
         // Up button
         menuButton = UIButton()
         menuButton.frame = CGRectMake( -44, 30, 44, 44)
@@ -168,7 +195,7 @@ class ViewController: UIViewController {
         nearLabel.frame = CGRectMake(width/2 - nearLabel.frame.width/2, height/2 - 150, nearLabel.frame.width, nearLabel.frame.height)
         nearLabel.textColor = UIColor.whiteColor()
         nearLabel.alpha = 0
-        self.view.addSubview(nearLabel)
+        self.mainTableVIew.addSubview(nearLabel)
         
         nearNameLabel = UILabel()
         nearNameLabel.text = nearName
@@ -177,7 +204,7 @@ class ViewController: UIViewController {
         nearNameLabel.frame = CGRectMake(width/2 - nearNameLabel.frame.width/2, nearLabel.frame.size.height + nearLabel.frame.origin.y + 5, nearNameLabel.frame.width, nearNameLabel.frame.height)
         nearNameLabel.textColor = UIColor.whiteColor()
         nearNameLabel.alpha = 0
-        self.view.addSubview(nearNameLabel)
+        self.mainTableVIew.addSubview(nearNameLabel)
         
         nearDistanceLabel = UILabel()
         nearDistanceLabel.text = nearDistance
@@ -186,7 +213,7 @@ class ViewController: UIViewController {
         nearDistanceLabel.frame = CGRectMake(width/2 - nearDistanceLabel.frame.width/2, nearNameLabel.frame.size.height + nearNameLabel.frame.origin.y + 5, nearDistanceLabel.frame.width, nearDistanceLabel.frame.height)
         nearDistanceLabel.textColor = UIColor.whiteColor()
         nearDistanceLabel.alpha = 0
-        self.view.addSubview(nearDistanceLabel)
+        self.mainTableVIew.addSubview(nearDistanceLabel)
         
         navigateButton = UIButton()
         navigateButton.frame = CGRectMake( width/2 - 22, nearDistanceLabel.frame.size.height + nearDistanceLabel.frame.origin.y + 10, 44, 44)
@@ -194,7 +221,7 @@ class ViewController: UIViewController {
         navigateButton.setTitle(ion_ios_navigate, forState: .Normal)
         navigateButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
         navigateButton.alpha = 0
-        self.view.addSubview(navigateButton)
+        self.mainTableVIew.addSubview(navigateButton)
         navigateButton.transform = CGAffineTransformMakeScale(0, 0);
         
         moreDetailsButton = FlatButton()
@@ -203,7 +230,7 @@ class ViewController: UIViewController {
         moreDetailsButton.alpha = 0.4
         moreDetailsButton.setTitle("詳細資訊", forState: .Normal)
         moreDetailsButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
-        self.view.addSubview(moreDetailsButton)
+        self.mainTableVIew.addSubview(moreDetailsButton)
         
         rentLabel = UILabel()
         rentLabel.text = "可借"
@@ -212,7 +239,7 @@ class ViewController: UIViewController {
         rentLabel.frame = CGRectMake(width/2 - rentLabel.frame.width/2 - 60, height - 200, rentLabel.frame.width, rentLabel.frame.height)
         rentLabel.textColor = UIColor.whiteColor()
         rentLabel.alpha = 0
-        self.view.addSubview(rentLabel)
+        self.mainTableVIew.addSubview(rentLabel)
         
         rentCountLabel = UILabel()
         rentCountLabel.text = rentCount
@@ -221,7 +248,7 @@ class ViewController: UIViewController {
         rentCountLabel.frame = CGRectMake(rentLabel.center.x - rentCountLabel.frame.width/2, rentLabel.frame.size.height + rentLabel.frame.origin.y + 5, rentCountLabel.frame.width, rentCountLabel.frame.height)
         rentCountLabel.textColor = UIColor.whiteColor()
         rentCountLabel.alpha = 0
-        self.view.addSubview(rentCountLabel)
+        self.mainTableVIew.addSubview(rentCountLabel)
         
         returnLabel = UILabel()
         returnLabel.text = "可還"
@@ -230,8 +257,7 @@ class ViewController: UIViewController {
         returnLabel.frame = CGRectMake(width/2 - returnLabel.frame.width/2 + 60, height - 200, returnLabel.frame.width, returnLabel.frame.height)
         returnLabel.textColor = UIColor.whiteColor()
         returnLabel.alpha = 0
-        self.view.addSubview(returnLabel)
-        
+        self.mainTableVIew.addSubview(returnLabel)
         
         returnCountLabel = UILabel()
         returnCountLabel.text = returnCount
@@ -240,12 +266,39 @@ class ViewController: UIViewController {
         returnCountLabel.frame = CGRectMake(returnLabel.center.x - returnCountLabel.frame.width/2, returnLabel.frame.size.height + returnLabel.frame.origin.y + 5, returnCountLabel.frame.width, returnCountLabel.frame.height)
         returnCountLabel.textColor = UIColor.whiteColor()
         returnCountLabel.alpha = 0
-        self.view.addSubview(returnCountLabel)
+        self.mainTableVIew.addSubview(returnCountLabel)
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    // MARK: All about table view delegate and datasource
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 15
+    }
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        if (indexPath.row == 0) {
+            return self.view.frame.height
+        } else {
+            return 100
+        }
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+        
+        cell.backgroundColor = UIColor.clearColor()
+        if (indexPath.row > 0) {
+            cell.textLabel?.text = allStationData[indexPath.row]["sna"] as? String
+            cell.detailTextLabel?.text = allStationData[indexPath.row]["distance"] as? String
+        }
+        cell.textLabel?.textColor = UIColor.whiteColor()
+        
+        return cell
     }
 }
 
