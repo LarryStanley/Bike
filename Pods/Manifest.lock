@@ -1,0 +1,33 @@
+PODS:
+  - Advance (0.9.1)
+  - Alamofire (3.4.1)
+  - Hex (3.0.0)
+  - ionicons (2.0.3)
+  - LTMorphingLabel (0.2.0)
+  - Material (1.42.7)
+  - NVActivityIndicatorView (2.8)
+  - SwiftLocation (0.9.0)
+
+DEPENDENCIES:
+  - Advance
+  - Alamofire
+  - Hex
+  - ionicons
+  - LTMorphingLabel
+  - Material
+  - NVActivityIndicatorView
+  - SwiftLocation
+
+SPEC CHECKSUMS:
+  Advance: 58f115c484cded634ffe529fcf6d39e741de1a44
+  Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
+  Hex: ee430da9c4412d9196366ae5327f279021dc03eb
+  ionicons: ec1e86e6c3316bd9942a7f024080dd75c70dd6a5
+  LTMorphingLabel: 490aa8e079f9247c7f3130f7d4b1be1d66677377
+  Material: 2d46a44719b1f19e52956518af8aea54ac714963
+  NVActivityIndicatorView: 6aba1dbbd893f615a9452c9e66ae46473e1ce092
+  SwiftLocation: f18e71300a89f2a81001c9615b7694150e6b84de
+
+PODFILE CHECKSUM: 3bc1de8c72c89390698a413be6c8d4f1cb927f91
+
+COCOAPODS: 1.0.1
